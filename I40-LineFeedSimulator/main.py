@@ -1,3 +1,10 @@
+"""
+Entry point for the LineFeed Simulator.
+
+Parses command-line arguments, configures logging (console + optional log file),
+wires up the MQTT publisher, and drives the Scheduler through one or more passes
+of the production order schedule.
+"""
 from __future__ import annotations
 
 import argparse

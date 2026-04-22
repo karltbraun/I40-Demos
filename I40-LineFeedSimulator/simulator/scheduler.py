@@ -1,3 +1,10 @@
+"""
+Production schedule runner.
+
+Iterates through the ordered queue of production orders, invoking the MES
+to execute each one with a changeover between consecutive orders.  Sets the
+line to idle when the schedule is exhausted.
+"""
 from __future__ import annotations
 
 import logging

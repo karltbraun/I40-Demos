@@ -1,3 +1,10 @@
+"""
+MQTT topic definitions for the LineFeed Simulator.
+
+Defines the ISA-95-structured topic tree rooted at the NewCo/Soledad facility.
+All simulator metrics are published under these topics so downstream consumers
+(Telegraf, Node-RED, Grafana) can subscribe to a consistent namespace.
+"""
 LINE = "NewCo/Soledad/RawProductDump/Line1"
 CELL = f"{LINE}/CutterFeed"
 

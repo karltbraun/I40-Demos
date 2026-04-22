@@ -1,3 +1,11 @@
+"""
+MQTT publisher wrapper for the LineFeed Simulator.
+
+Manages a single paho-mqtt client connection to the broker and exposes a
+simple publish() interface that serialises values as JSON payloads.
+Integers are coerced to float before serialisation to maintain a consistent
+numeric type for InfluxDB's line protocol schema.
+"""
 from __future__ import annotations
 
 import json

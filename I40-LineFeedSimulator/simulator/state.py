@@ -1,3 +1,10 @@
+"""
+Production line state enumeration.
+
+Defines the discrete states a production line can occupy, with integer values
+compatible with the MQTT numeric payload and human-readable labels for the
+string payload published in parallel.
+"""
 from enum import IntEnum
 
 

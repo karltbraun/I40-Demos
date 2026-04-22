@@ -1,3 +1,10 @@
+"""
+Manufacturing Execution System (MES) layer.
+
+Accepts production orders from the Scheduler, coordinates the line through
+setup, production, and changeover phases, and delegates tick-level execution
+to the ProductionEngine.
+"""
 from __future__ import annotations
 
 import time

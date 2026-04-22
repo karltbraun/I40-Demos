@@ -1,3 +1,11 @@
+"""
+Tick-based production line simulation engine.
+
+Simulates line speed using a mean-reverting model around the operator setpoint,
+injects random stoppages drawn from a Poisson process, tracks OEE availability,
+and publishes all metrics to the MQTT broker each tick.  Also manages line state
+transitions (idle, setup, running, stop, changeover).
+"""
 from __future__ import annotations
 
 import math

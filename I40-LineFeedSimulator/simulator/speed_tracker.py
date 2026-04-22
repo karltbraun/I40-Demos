@@ -1,3 +1,10 @@
+"""
+Rolling line-speed averages for the LineFeed Simulator.
+
+Maintains three time-windowed deques (1-minute, 5-minute, and full-run) and
+exposes their means as properties.  Stale entries are evicted lazily on each
+read and on each new sample addition.
+"""
 from __future__ import annotations
 
 import time

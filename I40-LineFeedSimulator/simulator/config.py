@@ -1,3 +1,11 @@
+"""
+Configuration loading for the LineFeed Simulator.
+
+Defines dataclasses for every configuration section (MQTT, simulator timing,
+stoppages, changeovers, alerts, recipes, and the production schedule).  Values
+are read from a TOML file; MQTT_BROKER and MQTT_PORT environment variables
+(and the .env file via python-dotenv) can override the TOML broker settings.
+"""
 from __future__ import annotations
 
 import os
