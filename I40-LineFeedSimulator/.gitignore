@@ -15,3 +15,6 @@ wheels/
 # Secrets / local config overrides
 .env
 *.local.toml
+
+# Runtime log output
+logs/

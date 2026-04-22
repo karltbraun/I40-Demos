@@ -1,34 +1,33 @@
 #!/usr/bin/env bash
-# Ensure the I40-Stack Docker stack is running, then launch the LineFeed Simulator.
+# Start the LineFeed Simulator container.
 # Auto-selects the correct compose file for the current platform.
-# Skips image pull for fast repeat starts.
+# Optional args are forwarded to lfs-restart after the container comes up.
+#
+# Usage:
+#   ./start-lfs                      # start with defaults (--speed 5 --loop)
+#   ./start-lfs --speed 10 --loop    # start then apply new parameters
 set -euo pipefail
 
 LFS_DIR="$(cd "$(dirname "$0")" && pwd)"
-I40_DIR="$(cd "$LFS_DIR/../I40-Stack" && pwd)"
 
 arch=$(uname -m)
 os=$(uname -s)
 
 if [[ "$arch" == "arm64" ]]; then
     COMPOSE_FILE="docker-compose.m3.yml"
-elif [[ "$arch" == "x86_64" && "$os" == "Darwin" ]]; then
-    COMPOSE_FILE="docker-compose.x86_64.yml"
-elif [[ "$arch" == "x86_64" && "$os" == "Linux" ]]; then
+elif [[ "$arch" == "x86_64" ]]; then
     COMPOSE_FILE="docker-compose.x86_64.yml"
 else
     echo "ERROR: Unsupported platform: $os/$arch" >&2
     exit 1
 fi
 
-CONTAINERS=(i40-mosquitto i40-influxdb i40-telegraf i40-grafana i40-nodered i40-ignition)
-
 # ---------------------------------------------------------------------------
 # Pre-flight
 # ---------------------------------------------------------------------------
-if [ ! -f "$I40_DIR/.env" ]; then
-    echo "ERROR: $I40_DIR/.env not found." >&2
-    echo "  Run: cp $I40_DIR/.env.template $I40_DIR/.env  and fill in values." >&2
+if [ ! -f "$LFS_DIR/.env" ]; then
+    echo "ERROR: $LFS_DIR/.env not found." >&2
+    echo "  Run: cp $LFS_DIR/.env.template $LFS_DIR/.env  and fill in values." >&2
     exit 1
 fi
 
@@ -38,48 +37,25 @@ if ! docker info &>/dev/null; then
 fi
 
 # ---------------------------------------------------------------------------
-# Check which containers are already running
+# Start the container
 # ---------------------------------------------------------------------------
-not_running=()
-for name in "${CONTAINERS[@]}"; do
-    status=$(docker inspect --format '{{.State.Status}}' "$name" 2>/dev/null || echo "missing")
-    if [[ "$status" != "running" ]]; then
-        not_running+=("$name ($status)")
-    fi
-done
+echo "Platform: $os/$arch"
+echo "Compose:  $COMPOSE_FILE"
 
-if [[ ${#not_running[@]} -eq 0 ]]; then
-    echo "All containers already running."
-else
-    echo "Platform: $os/$arch"
-    echo "Compose:  $COMPOSE_FILE"
-    echo "Starting containers (skipping pull)..."
-    cd "$I40_DIR"
-    docker compose -f "$COMPOSE_FILE" up -d --no-build --remove-orphans
-fi
-
-# ---------------------------------------------------------------------------
-# Status summary
-# ---------------------------------------------------------------------------
-echo ""
-printf "%-20s %s\n" "CONTAINER" "STATUS"
-printf "%-20s %s\n" "---------" "------"
-for name in "${CONTAINERS[@]}"; do
-    status=$(docker inspect --format '{{.State.Status}}' "$name" 2>/dev/null || echo "missing")
-    printf "%-20s %s\n" "$name" "$status"
-done
-
-echo ""
-echo "  InfluxDB    http://localhost:8181"
-echo "  Telegraf    (internal)"
-echo "  Grafana     http://localhost:3000"
-echo "  Node-RED    http://localhost:1881"
-echo "  Ignition    http://localhost:8088"
-echo ""
-
-# ---------------------------------------------------------------------------
-# Launch simulator
-# ---------------------------------------------------------------------------
 cd "$LFS_DIR"
-echo "Starting LineFeed Simulator..."
-exec uv run python main.py "$@"
+docker compose -f "$COMPOSE_FILE" up -d --no-build
+
+echo ""
+echo "  Container:  i40-lfs"
+echo "  Log:        $LFS_DIR/logs/simulator.log"
+echo "  Restart:    docker exec i40-lfs lfs-restart --speed <N> --loop"
+echo "  Stop:       docker compose -f $COMPOSE_FILE stop lfs"
+echo ""
+
+# ---------------------------------------------------------------------------
+# Apply parameters if provided
+# ---------------------------------------------------------------------------
+if [[ $# -gt 0 ]]; then
+    echo "Applying args: $*"
+    docker exec i40-lfs lfs-restart "$@"
+fi

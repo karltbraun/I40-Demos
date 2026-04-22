@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Restart the LineFeed Simulator inside its container with new parameters.
+# Run via: docker exec i40-lfs lfs-restart --speed 10 --loop
+set -euo pipefail
+
+ARGS_FILE="/run/lfs-args"
+
+if [[ $# -eq 0 ]]; then
+    echo "Usage: lfs-restart [--speed N] [--loop]" >&2
+    echo "  --speed N   Speed multiplier (e.g. 5 = 5x faster than real-time)" >&2
+    echo "  --loop      Repeat the schedule indefinitely" >&2
+    exit 1
+fi
+
+echo "$*" > "$ARGS_FILE"
+
+PID=$(pgrep -f "python.*main.py" 2>/dev/null || true)
+if [[ -z "$PID" ]]; then
+    echo "No simulator process running — args saved, will apply on next start."
+    exit 0
+fi
+
+kill -TERM "$PID"
+echo "Restarting simulator with: $*"

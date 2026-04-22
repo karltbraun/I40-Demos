@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Build and publish the I40 LineFeed Simulator image for multiple architectures.
+#
+# Usage:
+#   ./scripts/build-and-push-lfs [--registry <name>] [--image <name>] [--tag <value>]
+# Example:
+#   ./scripts/build-and-push-lfs --image i40-lfs --tag 2026-04-22.abc1234
+#
+# Requirements:
+#   - Docker Buildx enabled
+#   - Logged in to target registry (docker login ghcr.io)
+# =============================================================================
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+source "scripts/lib/common-build-args.sh"
+
+DEFAULT_REGISTRY="ghcr.io/karltbraun"
+DEFAULT_IMAGE="i40-lfs"
+
+init_build_args "$DEFAULT_REGISTRY" "$DEFAULT_IMAGE"
+parse_build_args "$0" "$DEFAULT_REGISTRY" "$DEFAULT_IMAGE" "$@"
+parse_status=$?
+if [[ $parse_status -eq 2 ]]; then
+    exit 0
+elif [[ $parse_status -ne 0 ]]; then
+    exit $parse_status
+fi
+
+full_image="${registry}/${image}:${tag}"
+
+if ! docker buildx version >/dev/null 2>&1; then
+    echo "ERROR: docker buildx is required but not available." >&2
+    exit 1
+fi
+
+echo "Registry: ${registry}"
+echo "Image:    ${image}"
+echo "Tag:      ${tag}"
+echo "Building and pushing multi-arch image: ${full_image}"
+docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    --file Dockerfile \
+    --tag "${full_image}" \
+    --push \
+    .
+
+echo ""
+echo "Published: ${full_image}"
+echo "Next step: set LFS_IMAGE=${full_image} in .env"

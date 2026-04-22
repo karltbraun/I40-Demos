@@ -15,10 +15,15 @@ from simulator.scheduler import Scheduler
 
 console = Console()
 
+_log_handlers: list[logging.Handler] = [RichHandler(console=console, show_path=False)]
+_log_file = Path("/logs/simulator.log")
+if _log_file.parent.exists():
+    _log_handlers.append(logging.FileHandler(_log_file, mode="w"))
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(message)s",
-    handlers=[RichHandler(console=console, show_path=False)],
+    handlers=_log_handlers,
 )
 logger = logging.getLogger(__name__)
 

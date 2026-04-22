@@ -1,0 +1,25 @@
+# =============================================================================
+# LineFeed Simulator — x86_64 / Intel/AMD (linux/amd64)
+# =============================================================================
+# Usage:
+#   docker compose -f docker-compose.x86_64.yml up -d
+#   Or: ./start-lfs [--speed N] [--loop]
+#
+# Before first start:
+#   cp .env.template .env  and fill in MQTT_BROKER and LFS_IMAGE
+#
+# To restart with new parameters while running:
+#   docker exec i40-lfs lfs-restart --speed 10 --loop
+# =============================================================================
+
+services:
+
+  lfs:
+    image: ${LFS_IMAGE:?Set LFS_IMAGE in .env}
+    platform: linux/amd64
+    container_name: i40-lfs
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/logs
