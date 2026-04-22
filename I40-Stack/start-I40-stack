@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# =============================================================================
+# I40-Stack — Startup Script
+# Auto-selects the correct compose file for the current platform
+# =============================================================================
+set -euo pipefail
+cd "$(dirname "$0")"
+
+# --- Pre-flight checks -------------------------------------------------------
+
+if [ ! -f ".env" ]; then
+    echo "ERROR: .env file not found." >&2
+    echo "  Run: cp .env.template .env  and fill in values." >&2
+    exit 1
+fi
+
+if [ ! -f "secrets/IGNITION_ADMIN_PASSWORD" ]; then
+    echo "ERROR: secrets/IGNITION_ADMIN_PASSWORD not found." >&2
+    echo "  Run: echo 'your-password' > secrets/IGNITION_ADMIN_PASSWORD" >&2
+    exit 1
+fi
+
+if ! grep -Eq '^[[:space:]]*NODE_RED_IMAGE=[^[:space:]#]+' ".env"; then
+    echo "ERROR: NODE_RED_IMAGE is not set in .env." >&2
+    echo "  Run: ./scripts/build-and-push-nodered [--registry <name>] [--image <name>] [--tag <value>]" >&2
+    echo "  Then set NODE_RED_IMAGE=<registry>/<image>:<tag> in .env" >&2
+    exit 1
+fi
+
+if ! grep -Eq '^[[:space:]]*IGNITION_IMAGE=[^[:space:]#]+' ".env"; then
+    echo "ERROR: IGNITION_IMAGE is not set in .env." >&2
+    echo "  Run: ./scripts/build-and-push-ignition [--registry <name>] [--image <name>] [--tag <value>]" >&2
+    echo "  Then set IGNITION_IMAGE=<registry>/<image>:<tag> in .env" >&2
+    exit 1
+fi
+
+if ! grep -Eq '^[[:space:]]*MOSQUITTO_IMAGE=[^[:space:]#]+' ".env"; then
+    echo "ERROR: MOSQUITTO_IMAGE is not set in .env." >&2
+    echo "  Run: ./scripts/build-and-push-mosquitto [--registry <name>] [--image <name>] [--tag <value>]" >&2
+    echo "  Then set MOSQUITTO_IMAGE=<registry>/<image>:<tag> in .env" >&2
+    exit 1
+fi
+
+# --- Platform detection ------------------------------------------------------
+
+arch=$(uname -m)
+os=$(uname -s)
+
+if [[ "$arch" == "arm64" ]]; then
+    compose_file="docker-compose.m3.yml"
+elif [[ "$arch" == "x86_64" && "$os" == "Darwin" ]]; then
+    compose_file="docker-compose.x86_64.yml"
+elif [[ "$arch" == "x86_64" && "$os" == "Linux" ]]; then
+    compose_file="docker-compose.x86_64.yml"
+else
+    echo "ERROR: Unsupported platform: $os/$arch" >&2
+    exit 1
+fi
+
+# --- Start -------------------------------------------------------------------
+
+echo "Platform: $os/$arch"
+echo "Compose:  $compose_file"
+echo ""
+echo "Pulling I40-Stack images..."
+docker compose -f "$compose_file" pull
+
+echo ""
+echo "Starting I40-Stack (pull-only mode)..."
+docker compose -f "$compose_file" up -d --no-build
+
+echo ""
+echo "Services:"
+echo "  Mosquitto   mqtt://localhost:1883"
+echo "  InfluxDB    http://localhost:8181"
+echo "  Node-RED    http://localhost:1881"
+echo "  Grafana     http://localhost:3000"
+echo "  Ignition    http://localhost:8088"

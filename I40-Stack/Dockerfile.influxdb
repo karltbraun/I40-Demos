@@ -1,0 +1,6 @@
+# =============================================================================
+# InfluxDB image for I40 demo
+# - Pins to the project's current InfluxDB 3 Core base image
+# - Ready for future customization while preserving pull-only deployments
+# =============================================================================
+FROM influxdb:3.9.0-core

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Template: build and push a multi-arch image.
+#
+# Copy this file and set DEFAULT_REGISTRY, DEFAULT_IMAGE,
+# and DOCKERFILE_PATH for your service.
+# =============================================================================
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+source "scripts/lib/common-build-args.sh"
+
+DEFAULT_REGISTRY="ghcr.io/karltbraun"
+DEFAULT_IMAGE="replace-me"
+DOCKERFILE_PATH="Dockerfile.replace-me"
+
+init_build_args "$DEFAULT_REGISTRY" "$DEFAULT_IMAGE"
+parse_build_args "$0" "$DEFAULT_REGISTRY" "$DEFAULT_IMAGE" "$@"
+parse_status=$?
+if [[ $parse_status -eq 2 ]]; then
+    exit 0
+elif [[ $parse_status -ne 0 ]]; then
+    exit $parse_status
+fi
+
+full_image="${registry}/${image}:${tag}"
+
+if ! docker buildx version >/dev/null 2>&1; then
+    echo "ERROR: docker buildx is required but not available." >&2
+    exit 1
+fi
+
+echo "Registry: ${registry}"
+echo "Image:    ${image}"
+echo "Tag:      ${tag}"
+echo "Building and pushing multi-arch image: ${full_image}"
+docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    --file "${DOCKERFILE_PATH}" \
+    --tag "${full_image}" \
+    --push \
+    .
+
+echo ""
+echo "Published: ${full_image}"

@@ -1,0 +1,20 @@
+# =============================================================================
+# Grafana Datasource Provisioning — InfluxDB 3 (I40 Demo)
+# Auto-configured on container start; no manual setup required
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB (I40 Demo)
+    type: influxdb
+    access: proxy
+    # InfluxDB is reachable by container name on the i40-demo-net network
+    url: http://influxdb:8181
+    isDefault: true
+    jsonData:
+      # InfluxQL mode — compatible with InfluxDB 3.x via the v1 query API
+      # For SQL/Flight queries, switch to a Grafana Flight SQL datasource plugin
+      version: InfluxQL
+      dbName: ${INFLUXDB_DATABASE}
+      httpMode: GET

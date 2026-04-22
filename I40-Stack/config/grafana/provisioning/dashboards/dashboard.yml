@@ -1,0 +1,17 @@
+# =============================================================================
+# Grafana Dashboard Provisioning — I40 Demo
+# Loads dashboard JSON files from this directory automatically
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: I40 Demo
+    orgId: 1
+    folder: I40 Demo
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

@@ -1,0 +1,10 @@
+{
+  "folders": [
+    { "name": "I40-Demos (root)", "path": "." },
+    { "name": "I40-Stack", "path": "I40-Stack" },
+    { "name": "I40-LineFeedSimulator", "path": "I40-LineFeedSimulator" },
+    { "name": "I40-SmartPlugs", "path": "I40-SmartPlugs" },
+    { "name": "I40-VirtualFactory", "path": "I40-VirtualFactory" }
+  ],
+  "settings": {}
+}

@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+# =============================================================================
+# InfluxDB Hello World test — write escalating time-series data and read back.
+#
+# Usage:
+#   ./scripts/test-influxdb              # Run the full write test
+#   ./scripts/test-influxdb --query      # Query recent data (no writes)
+#   ./scripts/test-influxdb --cleanup    # Drop the i40test database
+#
+# Writes to a dedicated 'i40test' database (separate from i40demo) so test
+# data never appears in demo dashboards.
+#
+# Three phases:
+#   Phase 1 — every 5 seconds for 60 seconds  (~12 writes)
+#   Phase 2 — every 60 seconds for 60 minutes (~60 writes)
+#   Phase 3 — every hour until stopped        (indefinite)
+# =============================================================================
+set -euo pipefail
+
+CONTAINER="i40-influxdb"
+DB="i40test"
+MEASUREMENT="i40_hello"
+HOST="http://localhost:8181"
+
+# =============================================================================
+# Helpers
+# =============================================================================
+
+influx_write() {
+    docker exec "$CONTAINER" influxdb3 write \
+        --host "$HOST" \
+        --database "$DB" \
+        "$1" 2>/dev/null
+}
+
+influx_query() {
+    docker exec "$CONTAINER" influxdb3 query \
+        --host "$HOST" \
+        --database "$DB" \
+        "$1" 2>/dev/null
+}
+
+preflight() {
+    if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^${CONTAINER}$"; then
+        echo "ERROR: Container '${CONTAINER}' is not running." >&2
+        echo "  Start the stack first: ./start" >&2
+        exit 1
+    fi
+}
+
+timestamp() {
+    date '+%Y-%m-%d %H:%M:%S'
+}
+
+summary_query() {
+    echo ""
+    echo "--- Data in ${DB}.${MEASUREMENT} ---"
+    influx_query "SELECT * FROM \"${MEASUREMENT}\" ORDER BY time DESC LIMIT 20" \
+        2>/dev/null || echo "(no data yet)"
+    echo ""
+    local count
+    count=$(influx_query "SELECT count(*) FROM \"${MEASUREMENT}\"" 2>/dev/null \
+        | grep -E '^\|' | grep -v 'count\|---' | awk -F'|' '{print $2}' | tr -d ' ' | head -1) || count=""
+    echo "Total rows written: ${count:-0}"
+}
+
+on_exit() {
+    echo ""
+    echo "Interrupted. Running final summary..."
+    summary_query
+    exit 0
+}
+
+# =============================================================================
+# Modes
+# =============================================================================
+
+do_query() {
+    preflight
+    echo "Querying last 20 rows from ${DB}.${MEASUREMENT}..."
+    summary_query
+}
+
+do_cleanup() {
+    preflight
+    echo "Dropping database '${DB}'..."
+    docker exec "$CONTAINER" influxdb3 delete database \
+        --host "$HOST" \
+        -y "$DB" 2>/dev/null && echo "Dropped." || echo "Database not found (nothing to clean up)."
+}
+
+do_write() {
+    preflight
+    trap on_exit INT TERM
+
+    local sequence=0
+
+    # Phase definitions: name, interval_seconds, duration_seconds, interval_label
+    local -a phase_names=("1" "2" "3")
+    local -a phase_intervals=(5 60 3600)
+    local -a phase_durations=(60 3600 -1)   # -1 = indefinite
+    local -a phase_labels=("5s" "60s" "1h")
+
+    for i in 0 1 2; do
+        local phase="${phase_names[$i]}"
+        local interval="${phase_intervals[$i]}"
+        local duration="${phase_durations[$i]}"
+        local label="${phase_labels[$i]}"
+
+        echo ""
+        if [[ "$duration" -eq -1 ]]; then
+            echo "=== Phase ${phase}: every ${label} until stopped (Ctrl+C to exit) ==="
+        else
+            echo "=== Phase ${phase}: every ${label} for $((duration / interval < 60 ? duration : duration / 60))$([ $((duration / interval)) -lt 60 ] && echo 's' || echo 'm') ==="
+        fi
+
+        local elapsed=0
+        while [[ "$duration" -eq -1 || "$elapsed" -lt "$duration" ]]; do
+            sequence=$((sequence + 1))
+            local line="${MEASUREMENT},phase=${phase},interval=${label} sequence=${sequence}i,message=\"Hello World\""
+            influx_write "$line"
+            echo "[$(timestamp)] Phase ${phase} | Write #${sequence} | interval=${label} | Next in ${label}"
+
+            sleep "$interval"
+            elapsed=$((elapsed + interval))
+        done
+
+        # End-of-phase summary (phases 1 and 2 only)
+        echo ""
+        echo "Phase ${phase} complete."
+        summary_query
+    done
+}
+
+# =============================================================================
+# Entry point
+# =============================================================================
+
+case "${1:-}" in
+    --query)   do_query ;;
+    --cleanup) do_cleanup ;;
+    "")        do_write ;;
+    *)
+        echo "Usage: $0 [--query | --cleanup]" >&2
+        exit 1
+        ;;
+esac

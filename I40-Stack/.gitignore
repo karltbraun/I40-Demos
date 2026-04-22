@@ -1,0 +1,25 @@
+# Environment — contains credentials, never commit
+.env
+.env-*
+!.env.template
+
+# Docker secrets — contain passwords, never commit
+secrets/*
+!secrets/.gitkeep
+
+# Ignition module files — licensed software, never commit
+modules/*.modl
+modules/*.modl-disabled
+!modules/.gitkeep
+
+# Runtime data directories (if bind-mounted instead of named volumes)
+data/
+
+# Temporary working directory
+tmp/
+
+# Captured script output
+scripts/*.txt
+
+# macOS
+.DS_Store

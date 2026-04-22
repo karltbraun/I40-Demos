@@ -1,0 +1,13 @@
+# =============================================================================
+# Node-RED — I40 Demo
+# Extends the official image with nodes for MQTT, InfluxDB, and dashboarding
+# =============================================================================
+
+FROM nodered/node-red:latest
+
+# Install I40-specific Node-RED modules:
+#   node-red-contrib-influxdb  — InfluxDB read/write nodes (v1/v2/v3 API support)
+#   @flowfuse/node-red-dashboard — modern dashboard UI nodes
+RUN npm install \
+    node-red-contrib-influxdb \
+    @flowfuse/node-red-dashboard

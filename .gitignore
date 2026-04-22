@@ -1,0 +1,32 @@
+# Environment — contains credentials, never commit
+.env
+.env-*
+!**/.env.template
+
+# Docker secrets — contain passwords, never commit
+**/secrets/*
+!**/secrets/.gitkeep
+
+# Ignition module files — licensed software, never commit
+**/modules/*.modl
+**/modules/*.modl-disabled
+!**/modules/.gitkeep
+
+# Python
+**/__pycache__/
+**/*.py[oc]
+**/build/
+**/dist/
+**/wheels/
+**/*.egg-info
+**/.venv
+
+# Runtime / temp
+**/data/
+**/tmp/
+
+# Captured script output
+**/scripts/*.txt
+
+# macOS
+.DS_Store

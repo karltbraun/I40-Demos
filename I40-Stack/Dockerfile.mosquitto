@@ -1,0 +1,6 @@
+# =============================================================================
+# Mosquitto image for I40 demo
+# - Uses Eclipse Mosquitto base image
+# - Keeps behavior consistent with pull-only deployments
+# =============================================================================
+FROM eclipse-mosquitto:latest

@@ -1,0 +1,197 @@
+# =============================================================================
+# I40 Demo Stack — ARM64 / Apple M-series (linux/arm64)
+# Services: Mosquitto, InfluxDB 3, Node-RED, Grafana, Ignition, Telegraf
+# =============================================================================
+# Usage:
+#   docker compose -f docker-compose.m3.yml up -d
+#   Or: ./start
+#
+# Before first start:
+#   1. cp .env.template .env  and fill in values
+#   2. echo "your-password" > secrets/IGNITION_ADMIN_PASSWORD
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # MQTT Broker — central message bus for the I40 demo
+  # ---------------------------------------------------------------------------
+  mosquitto:
+    image: ${MOSQUITTO_IMAGE:?Set MOSQUITTO_IMAGE in .env}
+    platform: linux/arm64
+    container_name: i40-mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./config/mosquitto:/mosquitto/config:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/#' -C 1 -i healthcheck -W 3"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - i40-demo-net
+
+  # ---------------------------------------------------------------------------
+  # Time-Series Database — historian for all I40 signal data
+  # ---------------------------------------------------------------------------
+  influxdb:
+    image: ${INFLUXDB_IMAGE:?Set INFLUXDB_IMAGE in .env}
+    platform: linux/arm64
+    container_name: i40-influxdb
+    restart: unless-stopped
+    env_file:
+      - .env
+    command:
+      - serve
+      - --object-store
+      - file
+      - --data-dir
+      - /var/lib/influxdb3
+      - --node-id-from-env
+      - INFLUXDB3_HOST_ID
+      - --without-auth
+    ports:
+      - "8181:8181"
+    volumes:
+      - influxdb-data:/var/lib/influxdb3
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/8181'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - i40-demo-net
+
+  # ---------------------------------------------------------------------------
+  # Node-RED — visual/low-code MQTT consumer and data transformer
+  # Demonstrates the low-code path: MQTT → transform → InfluxDB
+  # Port remapped to 1881 (1880 is in use by another project)
+  # ---------------------------------------------------------------------------
+  node-red:
+    image: ${NODE_RED_IMAGE:?Set NODE_RED_IMAGE in .env}
+    platform: linux/arm64
+    container_name: i40-nodered
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "1881:1880"
+    volumes:
+      - nodered-data:/data
+      - ./flows:/data/flows
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - i40-demo-net
+
+  # ---------------------------------------------------------------------------
+  # Grafana — visualization and dashboarding
+  # Queries InfluxDB; auto-provisioned datasource via config/grafana/
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: ${GRAFANA_IMAGE:?Set GRAFANA_IMAGE in .env}
+    platform: linux/arm64
+    container_name: i40-grafana
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      influxdb:
+        condition: service_healthy
+    networks:
+      - i40-demo-net
+
+  # ---------------------------------------------------------------------------
+  # Ignition — full SCADA/HMI with MQTT Engine + MQTT Transmission
+  # MQTT Engine: subscribes to broker → auto-creates Ignition tags
+  # MQTT Transmission: publishes Ignition tags back to broker (bidirectional)
+  # Modules are packaged into the published Ignition image.
+  # ---------------------------------------------------------------------------
+  ignition:
+    image: ${IGNITION_IMAGE:?Set IGNITION_IMAGE in .env}
+    platform: linux/arm64
+    container_name: i40-ignition
+    restart: unless-stopped
+    environment:
+      ACCEPT_IGNITION_EULA: "Y"
+      IGNITION_EDITION: standard
+      GATEWAY_ADMIN_USERNAME: ${IGNITION_ADMIN_USERNAME:-admin}
+      GATEWAY_ADMIN_PASSWORD_FILE: /run/secrets/ignition-password
+    ports:
+      - "8088:8088"
+    volumes:
+      - ignition-data:/usr/local/bin/ignition/data
+    secrets:
+      - ignition-password
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - i40-demo-net
+
+  # ---------------------------------------------------------------------------
+  # Telegraf — zero-config MQTT consumer writing directly to InfluxDB
+  # Demonstrates the zero-config path alongside Node-RED (same data, two paths)
+  # No exposed ports — internal pipeline service only
+  # Uses upstream image directly (no customization needed). Pin the tag here.
+  # ---------------------------------------------------------------------------
+  telegraf:
+    image: telegraf:1.33
+    platform: linux/arm64
+    container_name: i40-telegraf
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      influxdb:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    networks:
+      - i40-demo-net
+
+# =============================================================================
+# Secrets
+# =============================================================================
+secrets:
+  ignition-password:
+    file: ./secrets/IGNITION_ADMIN_PASSWORD
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  i40-demo-net:
+    name: i40-demo-net
+    driver: bridge
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  mosquitto-data:
+    name: i40-mosquitto-data
+  mosquitto-log:
+    name: i40-mosquitto-log
+  influxdb-data:
+    name: i40-influxdb-data
+  nodered-data:
+    name: i40-nodered-data
+  grafana-data:
+    name: i40-grafana-data
+  ignition-data:
+    name: i40-ignition-data

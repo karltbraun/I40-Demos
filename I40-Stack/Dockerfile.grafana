@@ -1,0 +1,6 @@
+# =============================================================================
+# Grafana image for I40 demo
+# - Uses official Grafana base image
+# - Compatible with pull-only deployments
+# =============================================================================
+FROM grafana/grafana:latest

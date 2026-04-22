@@ -1,0 +1,382 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Power consumption and temperature monitoring — Shelly smart plug + Pi1 sensor",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "hide": 2,
+        "includeAll": false,
+        "name": "datasource",
+        "options": [],
+        "query": "influxdb",
+        "refresh": 1,
+        "type": "datasource",
+        "label": "Data Source"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1500 },
+              { "color": "red", "value": 2400 }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"apower\") FROM \"smartplug\" WHERE $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Power",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "text", "value": null }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 130 },
+              { "color": "red", "value": 150 }
+            ]
+          },
+          "unit": "fahrenheit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"tF\") FROM \"smartplug\" WHERE $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Plug Temperature",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "text", "value": null }
+            ]
+          },
+          "unit": "fahrenheit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"value\") FROM \"temperature\" WHERE $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Room Temperature (Pi1)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Watts",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 4 },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["last", "mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "alias": "Active Power",
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT mean(\"apower\") FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Active Power Over Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "blue", "mode": "fixed" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "kWh",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 13 },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": ["last"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "alias": "Total Energy",
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Cumulative Energy Consumption",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "°F",
+            "axisPlacement": "auto",
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          },
+          "unit": "fahrenheit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": ["last", "mean", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      },
+      "targets": [
+        {
+          "alias": "Plug Temp",
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT mean(\"tF\") FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        },
+        {
+          "alias": "Room Temp (Pi1)",
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT mean(\"value\") FROM \"temperature\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "B"
+        }
+      ],
+      "title": "Temperatures",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["smartplugs", "i40", "power"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "SmartPlugs \u2014 Power & Temperature",
+  "uid": "smartplugs-v1",
+  "version": 1
+}

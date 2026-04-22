@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# =============================================================================
+# watch-temperature — poll InfluxDB for the latest temperature readings
+#
+# Usage:
+#   ./scripts/watch-temperature              # Poll every 15 seconds (default)
+#   ./scripts/watch-temperature --interval 5 # Poll every 5 seconds
+# =============================================================================
+set -euo pipefail
+
+CONTAINER="i40-influxdb"
+DB="i40demo"
+HOST="http://localhost:8181"
+INTERVAL=15
+
+# ---------------------------------------------------------------------------
+# Args
+# ---------------------------------------------------------------------------
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --interval) INTERVAL="$2"; shift 2 ;;
+        *) echo "Usage: $0 [--interval <seconds>]" >&2; exit 1 ;;
+    esac
+done
+
+# ---------------------------------------------------------------------------
+# Preflight
+# ---------------------------------------------------------------------------
+if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^${CONTAINER}$"; then
+    echo "ERROR: Container '${CONTAINER}' is not running. Start I40-Stack first." >&2
+    exit 1
+fi
+
+# ---------------------------------------------------------------------------
+# Poll loop
+# ---------------------------------------------------------------------------
+echo "Watching temperature in ${DB} (every ${INTERVAL}s) — Ctrl+C to stop"
+echo ""
+
+while true; do
+    echo "=== $(date '+%Y-%m-%d %H:%M:%S') ==="
+    docker exec "$CONTAINER" influxdb3 query \
+        --host "$HOST" \
+        --database "$DB" \
+        "SELECT time, device, sensor_id, value FROM temperature ORDER BY time DESC LIMIT 10" \
+        2>/dev/null || echo "(query failed)"
+    echo ""
+    sleep "$INTERVAL"
+done
