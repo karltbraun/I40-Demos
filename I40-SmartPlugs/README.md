@@ -4,9 +4,28 @@ SmartPlug monitoring demo built on top of [I40-Stack](../I40-Stack).
 
 ## What this is
 
-Collects power and temperature data from Shelly smart plugs and a Raspberry Pi temperature
-sensor, routes it through the I40-Stack MQTT broker and Node-RED into InfluxDB, and
-visualizes it in Grafana.
+Collects power and weather sensor data which has been published into an MQTT Broker via a node red flow, stores it in InfluxDB, and visualizes it in Grafana.
+
+It doesn't really matter how the data gets into the MQTT broker, but we expect the following topics to be published:
+| Topic | Description |
+|---|---|
+|"KTBMES/TWIX/#/smartplugs/#/switch:0/apower"| Active power (W)(*) |
+
+(*) The '#' is a wildcard for the location and smartplug name.  The location names can be:
+
+| Location | Description |
+|---|---|
+|'garage'| EV smartplug |
+|'office'| Contains the Lab and the Production Smartplugs|
+
+The smartplug names can be:
+| Smartplug name | Description |
+|---|---|
+| Shelly_EV | EV smartplug |
+| Shelly_Lab_01 | Lab smartplug |
+| Shelly_Prod | Production smartplug |   
+
+See the "Weather_Sensors_and_Smartplugs_with_MQTT" project for details on how these values are published into these topics.
 
 ## Prerequisites
 
@@ -16,9 +35,11 @@ I40-Stack must be running before using anything here:
 cd ../I40-Stack && ./start-I40-stack
 ```
 
+Weather_Sensors_and_Smartplugs_with_MQTT project must be running to feed data into the MQTT broker
+
 ## Contents
 
-| Path | Purpose |
+ Path | Purpose |
 |---|---|
 | `flows/shelly-prod.json` | Node-RED flow: Shelly_Prod (office) → InfluxDB (apower, total, tF) |
 | `flows/shelly-ev.json` | Node-RED flow: Shelly_EV (garage) → InfluxDB (apower, total, tF) |
