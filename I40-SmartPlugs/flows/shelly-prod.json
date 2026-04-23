@@ -10,7 +10,7 @@
         "id": "broker-vultr2",
         "type": "mqtt-broker",
         "name": "Vultr2",
-        "broker": "100.100.164.105",
+        "broker": "mosquitto-docker-network",
         "port": "1883",
         "clientid": "",
         "autoConnect": true,
