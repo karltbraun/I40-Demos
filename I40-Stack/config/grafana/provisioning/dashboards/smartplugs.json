@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Power consumption and temperature monitoring — Shelly smart plug + Pi1 sensor",
+  "description": "Power consumption and temperature monitoring — Shelly_Prod, Shelly_EV + Pi1 sensor",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -68,13 +68,13 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "${datasource}" },
-          "query": "SELECT last(\"apower\") FROM \"smartplug\" WHERE $timeFilter",
+          "query": "SELECT last(\"apower\") FROM \"smartplug\" WHERE \"device\" = 'Shelly_Prod' AND $timeFilter",
           "rawQuery": true,
           "resultFormat": "time_series",
           "refId": "A"
         }
       ],
-      "title": "Active Power",
+      "title": "Shelly_Prod — Active Power",
       "type": "stat"
     },
     {
@@ -106,13 +106,13 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "${datasource}" },
-          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE $timeFilter",
+          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE \"device\" = 'Shelly_Prod' AND $timeFilter",
           "rawQuery": true,
           "resultFormat": "time_series",
           "refId": "A"
         }
       ],
-      "title": "Total Energy",
+      "title": "Shelly_Prod — Total Energy",
       "type": "stat"
     },
     {
@@ -146,13 +146,13 @@
       "targets": [
         {
           "datasource": { "type": "influxdb", "uid": "${datasource}" },
-          "query": "SELECT last(\"tF\") FROM \"smartplug\" WHERE $timeFilter",
+          "query": "SELECT last(\"tF\") FROM \"smartplug\" WHERE \"device\" = 'Shelly_Prod' AND $timeFilter",
           "rawQuery": true,
           "resultFormat": "time_series",
           "refId": "A"
         }
       ],
-      "title": "Plug Temperature",
+      "title": "Shelly_Prod — Plug Temp",
       "type": "stat"
     },
     {
@@ -197,6 +197,124 @@
       "datasource": { "type": "influxdb", "uid": "${datasource}" },
       "fieldConfig": {
         "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1500 },
+              { "color": "red", "value": 2400 }
+            ]
+          },
+          "unit": "watt"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+      "id": 8,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"apower\") FROM \"smartplug\" WHERE \"device\" = 'Shelly_EV' AND $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Shelly_EV — Active Power",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "text", "value": null }
+            ]
+          },
+          "unit": "kwatth"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 4 },
+      "id": 9,
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE \"device\" = 'Shelly_EV' AND $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Shelly_EV — Total Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 130 },
+              { "color": "red", "value": 150 }
+            ]
+          },
+          "unit": "fahrenheit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 4 },
+      "id": 10,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${datasource}" },
+          "query": "SELECT last(\"tF\") FROM \"smartplug\" WHERE \"device\" = 'Shelly_EV' AND $timeFilter",
+          "rawQuery": true,
+          "resultFormat": "time_series",
+          "refId": "A"
+        }
+      ],
+      "title": "Shelly_EV — Plug Temp",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
           "color": { "mode": "palette-classic" },
           "custom": {
             "axisCenteredZero": false,
@@ -225,7 +343,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 4 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 8 },
       "id": 5,
       "options": {
         "legend": {
@@ -234,13 +352,13 @@
           "placement": "bottom",
           "showLegend": true
         },
-        "tooltip": { "mode": "single", "sort": "none" }
+        "tooltip": { "mode": "multi", "sort": "none" }
       },
       "targets": [
         {
-          "alias": "Active Power",
+          "alias": "$tag_device",
           "datasource": { "type": "influxdb", "uid": "${datasource}" },
-          "query": "SELECT mean(\"apower\") FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT mean(\"apower\") FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval), \"device\" fill(previous)",
           "rawQuery": true,
           "resultFormat": "time_series",
           "refId": "A"
@@ -253,7 +371,7 @@
       "datasource": { "type": "influxdb", "uid": "${datasource}" },
       "fieldConfig": {
         "defaults": {
-          "color": { "fixedColor": "blue", "mode": "fixed" },
+          "color": { "mode": "palette-classic" },
           "custom": {
             "axisCenteredZero": false,
             "axisColorMode": "text",
@@ -281,7 +399,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 13 },
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 17 },
       "id": 6,
       "options": {
         "legend": {
@@ -290,13 +408,13 @@
           "placement": "bottom",
           "showLegend": true
         },
-        "tooltip": { "mode": "single", "sort": "none" }
+        "tooltip": { "mode": "multi", "sort": "none" }
       },
       "targets": [
         {
-          "alias": "Total Energy",
+          "alias": "$tag_device",
           "datasource": { "type": "influxdb", "uid": "${datasource}" },
-          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT last(\"total\") / 1000 FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval), \"device\" fill(previous)",
           "rawQuery": true,
           "resultFormat": "time_series",
           "refId": "A"
@@ -337,7 +455,7 @@
         },
         "overrides": []
       },
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 26 },
       "id": 7,
       "options": {
         "legend": {
@@ -350,9 +468,9 @@
       },
       "targets": [
         {
-          "alias": "Plug Temp",
+          "alias": "$tag_device — Plug Temp",
           "datasource": { "type": "influxdb", "uid": "${datasource}" },
-          "query": "SELECT mean(\"tF\") FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval) fill(previous)",
+          "query": "SELECT mean(\"tF\") FROM \"smartplug\" WHERE $timeFilter GROUP BY time($__interval), \"device\" fill(previous)",
           "rawQuery": true,
           "resultFormat": "time_series",
           "refId": "A"
@@ -376,7 +494,7 @@
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
-  "title": "SmartPlugs \u2014 Power & Temperature",
+  "title": "SmartPlugs — Power & Temperature",
   "uid": "smartplugs-v1",
   "version": 1
 }

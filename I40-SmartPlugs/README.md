@@ -20,15 +20,18 @@ cd ../I40-Stack && ./start-I40-stack
 
 | Path | Purpose |
 |---|---|
-| `flows/shelly-prod.json` | Node-RED flow: Shelly plug → InfluxDB (apower, total, tF) |
+| `flows/shelly-prod.json` | Node-RED flow: Shelly_Prod (office) → InfluxDB (apower, total, tF) |
+| `flows/shelly-ev.json` | Node-RED flow: Shelly_EV (garage) → InfluxDB (apower, total, tF) |
 | `flows/pi1-temperature.json` | Node-RED flow: Pi1 temperature sensor → InfluxDB |
 | `scripts/watch-temperature` | Poll InfluxDB and print latest temperature readings |
 
 ## Loading flows into Node-RED
 
 1. Open Node-RED at `http://localhost:1881`
-2. Menu → Import → select the JSON file from `flows/`
+2. Menu → Import → select the JSON file(s) from `flows/`
 3. Deploy
+
+Each flow file is self-contained and can be imported independently. Shared config nodes (MQTT broker, InfluxDB) are deduplicated by Node-RED on import.
 
 ## Services (provided by I40-Stack)
 
