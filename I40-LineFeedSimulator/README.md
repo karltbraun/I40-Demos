@@ -8,54 +8,57 @@ The core demo story: a line operator running the cutter feed faster than the SKU
 
 ## Prerequisites
 
-- [uv](https://docs.astral.sh/uv/) Python package manager
-- I40-Stack running (`../I40-Stack/`) — `start-lfs` handles this automatically
+- Docker running
+- [I40-Stack](../I40-Stack/) running (provides the MQTT broker, InfluxDB, Grafana)
+- `.env` configured (see Setup below)
+
+---
+
+## Setup (first time)
+
+```bash
+cp .env.template .env
+```
+
+Edit `.env` and set:
+
+| Variable | Value |
+|---|---|
+| `LFS_IMAGE` | Published image tag — run `./scripts/build-and-push-lfs` to build, or use `ghcr.io/karltbraun/i40-lfs:2026-04-22.5f6a613` |
+| `MQTT_BROKER` | `host.docker.internal` if I40-Stack is on the same Mac; LAN IP or hostname otherwise |
 
 ---
 
 ## Starting the Demo
 
-**Recommended — starts I40-Stack if needed, then runs the simulator:**
-
 ```bash
-./start-lfs --speed 5 --loop
+./start-lfs                    # start with defaults (--speed 5 --loop)
+./start-lfs --speed 10 --loop  # start then apply faster speed
 ```
 
-**Direct — if I40-Stack is already running:**
+Auto-detects platform (Apple M-series or x86_64) and starts the container. Pulls the image on first run.
+
+### Changing speed while running
 
 ```bash
-uv run python main.py --speed 5 --loop
+docker exec i40-lfs lfs-restart --speed 10 --loop
 ```
 
-**Background:**
+Restarts the simulator inside the running container with new parameters — no container restart needed.
+
+### Monitoring logs
 
 ```bash
-./start-lfs --speed 5 --loop &
+tail -f logs/simulator.log
 ```
-
-### Options
-
-| Flag                 | Description                                             |
-| -------------------- | ------------------------------------------------------- |
-| `--speed MULTIPLIER` | Compress sim time (e.g. `5` = 5× faster than real-time) |
-| `--loop`             | Repeat the order schedule indefinitely until stopped    |
-| `--config PATH`      | Path to config file (default: `config.toml`)            |
-
-At `--speed 5` one full schedule cycle (SKU 101 → 102 → 103) takes about **3 minutes** of wall-clock time.
 
 ---
 
 ## Stopping the Demo
 
-**Foreground:** press `Ctrl-C`
-
-**Background:**
-
 ```bash
-kill $(pgrep -f "main.py")
+docker stop i40-lfs
 ```
-
-Both methods trigger a graceful shutdown: the line state is published as `IDLE` and the MQTT connection is cleanly closed.
 
 ---
 
@@ -69,6 +72,17 @@ The dashboard auto-refreshes and shows:
 - Live and historical cutter feed speed vs. recommended
 - Speed delta % (watch this climb during the SKU 102 run)
 - OEE Availability and downtime events
+
+---
+
+## Options
+
+| Flag                 | Description                                             |
+| -------------------- | ------------------------------------------------------- |
+| `--speed MULTIPLIER` | Compress sim time (e.g. `5` = 5× faster than real-time) |
+| `--loop`             | Repeat the order schedule indefinitely until stopped    |
+
+At `--speed 5` one full schedule cycle (SKU 101 → 102 → 103) takes about **3 minutes** of wall-clock time.
 
 ---
 

@@ -36,7 +36,7 @@ Start I40-Stack first, then launch either or both independently:
 
 | Application | Repo | How to start |
 |---|---|---|
-| LineFeed Simulator | `../I40-LineFeedSimulator` | `./start-lfs` (also starts stack if needed) |
+| LineFeed Simulator | `../I40-LineFeedSimulator` | `./start-lfs` |
 | SmartPlugs | `../I40-SmartPlugs` | Import flows into Node-RED at `http://localhost:1881` |
 
 ## Platforms
