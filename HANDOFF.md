@@ -1,47 +1,44 @@
 # Session Handoff
 
-## Session: 2026-05-13 (afternoon)
+## Session: 2026-05-13 (evening)
 
 ### What was worked on
 
-Work this session was entirely in the **I40 Obsidian vault** (`~/Vaults/I40/`) and Claude Code config — no changes to the I40-Demos codebase.
+Work entirely in the **I40 Obsidian vault** (`~/Vaults/I40/`) — no I40-Demos code changes.
 
-1. **Added Coreflux to the I40 Tool Belt Catalog** — created per-tool detail page `01 Tool Belt - Catalog/Coreflux.md` and updated three index/catalog files: `Table of Contents.md`, `Tools - Toolbelt Contents.md`, and `00 Master Index Industry 4.0.md`. All now link to the detail page.
+Reviewed the full vault structure (133 MD files, mostly flat at root) and designed a complete restructure:
 
-2. **Discovered vault convention**: Tool Belt Catalog files use `##` (H2) as top-level heading to support transclusion into other notes.
-
-3. **Granted Obsidian MCP tools auto-permission** in `~/.claude/settings.json` — all 13 `mcp__MCP_DOCKER__obsidian_*` tools allowed without prompting.
+- **7 top-level folders:** Tools/, Key Concepts/, IIOT University Classes/, ProveIT - Conference/, Reference/, Content/, Code/
+- **Key decisions:** Mastermind + Mentorship combined into "IIOT University Classes"; Walker Reynolds content and 12 Days of MES posts go there too; ProveIT gets its own "ProveIT - Conference" folder; I40 Wiki.md stays at root
+- **Created `I40/PLANNING - I40 Makeover.md`** — full planning doc with target structure, file-by-file mappings, git setup plan, and 10-phase migration sequence
 
 ### Status
 
-- Vault changes saved to disk. Vault is not version-controlled (no git).
+- Planning complete; no files moved yet.
+- **Phase 0 (git init for vault) has not been run** — must happen before any file moves.
 - I40-Demos repo: clean, up to date with `origin/main`.
 
 ### Next action
 
-Two open items carried from prior work:
-
-1. **Rosa Grafana bind-mount fix** — verify if already resolved; if not:
-   `cd /Users/karl/Development/KTBCS/I40-Demos/I40-Stack && docker compose -f docker-compose.m3.yml up -d grafana`
-
-2. **Shelly_Lab_01 flow** — third SmartPlug (office) needs a Node-RED flow + Grafana panel. Pattern: copy `shelly-ev.json`, update topic path and device tag.
+Run Phase 0 — initialize git in the vault:
+```bash
+cd /Users/karl/Vaults/I40
+git init
+# create .gitignore per PLANNING doc
+git add .
+git commit -m "Initial commit: vault state before restructure"
+```
+Then Phase 1: create the folder skeleton inside the vault.
 
 ### Open questions / blockers
 
-- None blocking. Rosa Grafana status unknown — verify before acting.
+- Does `SAP is still dumb.md` have useful content worth keeping?
+- Is `My IIOT Mini Course.md` a course Karl is developing (Content/) or notes from a class taken (IIOT University Classes/)?
+- Is `Salad Plant Bagger Line Emulator.md` linked to actual code? If so → Code/; if just notes → Content/
+- Which other IIOT conferences (besides ProveIT) will live in `ProveIT - Conference/`?
 
 ---
 
-## Session: 2026-05-13 (morning)
+## Session: 2026-05-13 (afternoon)
 
-### What was worked on
-
-Added Coreflux to `I40 Wiki.md` MQTT Brokers table. Rebuilt `00 Master Index Industry 4.0.md` from a sparse stub into a full ~120-link categorized index.
-
-### Status
-
-Vault edits saved. I40-Demos repo clean.
-
-### Next action
-
-Tool Belt Catalog additions (done in afternoon session above).
+Added Coreflux to Tool Belt Catalog (detail page + 3 index updates). Granted Obsidian MCP tools auto-permission in `~/.claude/settings.json`.
