@@ -1,14 +1,16 @@
 # Session Handoff
 
-## Session: 2026-05-13
+## Session: 2026-05-13 (afternoon)
 
 ### What was worked on
 
-Work this session was entirely in the **I40 Obsidian vault** (`~/Vaults/I40/`) — no changes to the I40-Demos codebase.
+Work this session was entirely in the **I40 Obsidian vault** (`~/Vaults/I40/`) and Claude Code config — no changes to the I40-Demos codebase.
 
-1. **Added Coreflux to the IOT Tools table** in `I40 Wiki.md` (MQTT Brokers section). Covers: LoT runtime for edge logic, industrial protocol connectors (Modbus, OPC-UA, Siemens S7, Allen-Bradley), performance specs, and pricing (free public broker; managed production = contact for quote).
+1. **Added Coreflux to the I40 Tool Belt Catalog** — created per-tool detail page `01 Tool Belt - Catalog/Coreflux.md` and updated three index/catalog files: `Table of Contents.md`, `Tools - Toolbelt Contents.md`, and `00 Master Index Industry 4.0.md`. All now link to the detail page.
 
-2. **Rebuilt `00 Master Index Industry 4.0.md`** from a sparse stub into a full categorized index (~120 wikilinks) covering all major sections of the vault.
+2. **Discovered vault convention**: Tool Belt Catalog files use `##` (H2) as top-level heading to support transclusion into other notes.
+
+3. **Granted Obsidian MCP tools auto-permission** in `~/.claude/settings.json` — all 13 `mcp__MCP_DOCKER__obsidian_*` tools allowed without prompting.
 
 ### Status
 
@@ -17,7 +19,7 @@ Work this session was entirely in the **I40 Obsidian vault** (`~/Vaults/I40/`) �
 
 ### Next action
 
-Two open items from prior work:
+Two open items carried from prior work:
 
 1. **Rosa Grafana bind-mount fix** — verify if already resolved; if not:
    `cd /Users/karl/Development/KTBCS/I40-Demos/I40-Stack && docker compose -f docker-compose.m3.yml up -d grafana`
@@ -27,3 +29,19 @@ Two open items from prior work:
 ### Open questions / blockers
 
 - None blocking. Rosa Grafana status unknown — verify before acting.
+
+---
+
+## Session: 2026-05-13 (morning)
+
+### What was worked on
+
+Added Coreflux to `I40 Wiki.md` MQTT Brokers table. Rebuilt `00 Master Index Industry 4.0.md` from a sparse stub into a full ~120-link categorized index.
+
+### Status
+
+Vault edits saved. I40-Demos repo clean.
+
+### Next action
+
+Tool Belt Catalog additions (done in afternoon session above).
